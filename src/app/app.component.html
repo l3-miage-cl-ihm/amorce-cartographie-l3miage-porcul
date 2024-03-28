@@ -1,12 +1,9 @@
 <h1>Amorce de code pour utilisation de la cartographie</h1>
 
-<div leaflet
-     [leafletOptions]="options()"
-     [leafletCenter]="center()" (leafletCenterChange)="center.set($event)"
-     [leafletZoom]="zoom()" (leafletZoomChange)="zoom.set($event)"
-></div>
+<div leaflet [leafletLayers]="layers()" [leafletCenter]="center()" (leafletCenterChange)="center.set($event)"
+  [leafletZoom]="zoom()" (leafletZoomChange)="zoom.set($event)" (leafletClick)="addMarker($event)"></div>
 
-<hr/>
+<hr />
 <pre>
   Carte centrée en {{center().lat}}, {{center().lng}} avec un zoom de {{zoom()}}
 </pre>
