@@ -1,7 +1,7 @@
 import { Component, Signal, computed, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
-import { MapOptions, tileLayer, LatLng, LatLngLiteral, marker, icon, Icon } from 'leaflet';
+import { MapOptions, tileLayer, LatLng, LatLngLiteral, marker, icon, Icon, Layer, LeafletMouseEvent } from 'leaflet';
 
 @Component({
   selector: 'app-root',
@@ -27,13 +27,28 @@ export class AppComponent {
     { lat: 44.56414746666089, lng: 6.495827436447144},   // Place Bartelon
   ]);
   
-  readonly options: Signal<MapOptions> = computed(() => ({
-    layers: [
-      tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '...' }),
-      ...this.places().map( ({lat, lng}) => marker([lat, lng], {icon: this.defaultIcon()}) )
-    ]
-  }) )
-  
+  private readonly sigMarkers = computed(() => 
+    this.places().map( ({lat, lng}) => 
+    marker([lat, lng], {icon: this.defaultIcon()}) 
+  ));
+
+  readonly layers: Signal<Layer[]> = computed(() => ([
+    tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '...' }),
+    ...this.sigMarkers()
+  ]));
+
+  addMarker(event : LeafletMouseEvent): void {
+    this.places.update(places => [...places, event.latlng]);
+    console.log(this.obtenirItineraire());
+  }
+
+  async obtenirItineraire(): Promise <Layer[]> {
+
+    let parametre = [this.places().map( ({lat, lng}) => [lat, lng].join(',') ).join(',')];
+    const reponse = await fetch(`https://api.openrouteservice.org/v2/directions/driving-car?{coordinates=${parametre}&api_key=5b3ce3597851110001cf6248b3b3b3b7`);
+    return reponse.json();
+  }
+
   allerVoirEmbrun(): void {
     this.center.set(new LatLng(44.566672, 6.5));
     this.zoom.set(13);
